@@ -213,10 +213,16 @@ export function updateDuck(dt) {
   if (game.groundHat && !duck.dragged && !TOO_BUSY_FOR_HATS.has(duck.brain)) {
     startCollect();
   }
-  if (!duck.dragged) runBrain(duck, dt);
+  if (duck.dragged) {
+    duck.x = game.mouseX;
+    duck.y = game.mouseY;
+  } else {
+    runBrain(duck, dt);
+  }
   clampDuck();
 
-  const canTrip = duck.brain !== "flee" && duck.brain !== "brave" && duck.brain !== "protest";
+  // No tripping while on a ride (the logs are on the ground!) or while running about with the goose and bulldozer.
+  const canTrip = !["ride", "onRide", "flee", "brave", "protest"].includes(duck.brain);
   if (duck.tripCooldown <= 0 && !duck.dragged && canTrip) {
     for (const log of game.logs) {
       if (logCollide(duck.x, duck.y, log, 12)) {

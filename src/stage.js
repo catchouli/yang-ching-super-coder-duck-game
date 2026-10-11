@@ -32,6 +32,7 @@ export function stageClear() {
 }
 
 function advanceStage() {
+  game.particles = game.particles.filter(p => p.type !== "confetti");
   game.stage++;
   game.goal = 15 + (game.stage - 1) * 5;
   game.score = 0;

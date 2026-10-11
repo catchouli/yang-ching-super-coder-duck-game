@@ -16,6 +16,8 @@ function spawnMaisy() {
     x: dir > 0 ? -180 : W + 180,
     y: 528,
     dir,
+    // which way Maisy is facing once out of the bus
+    face: dir,
     stopX: rand(270, 530),
     state: "driving",
     timer: 0,
@@ -69,7 +71,7 @@ export function updateMaisy(dt) {
   } else if (m.state === "walkPond") {
     const dx = 212 - m.figX;
     m.figX += Math.sign(dx) * 120 * dt;
-    m.dir = dx >= 0 ? 1 : -1;
+    m.face = dx >= 0 ? 1 : -1;
     m.phase += dt * 10;
     if (Math.abs(dx) < 6) {
       m.state = "fishing";
@@ -81,18 +83,18 @@ export function updateMaisy(dt) {
     m.timer -= dt;
     if (m.timer < 1.2 && !m.bit) {
       m.bit = true;
-      game.particles.push({ type: "ring", x: m.figX + m.dir * 40, y: 514, life: 0.6, color: "#bfe8ff", size: 4 });
+      game.particles.push({ type: "ring", x: m.figX + m.face * 40, y: 514, life: 0.6, color: "#bfe8ff", size: 4 });
       playPeep();
     }
     if (Math.random() < 0.06) {
-      game.particles.push({ type: "ring", x: m.figX + m.dir * 40, y: 514, life: 0.7, color: "#bfe8ff", size: 3 });
+      game.particles.push({ type: "ring", x: m.figX + m.face * 40, y: 514, life: 0.7, color: "#bfe8ff", size: 3 });
     }
     if (m.timer <= 0) {
-      game.particles.push({ type: "fish", x: m.figX + m.dir * 40, y: 512, vx: m.dir * 90, vy: -170, life: 1.1 });
+      game.particles.push({ type: "fish", x: m.figX + m.face * 40, y: 512, vx: m.face * 90, vy: -170, life: 1.1 });
       game.particles.push({ type: "word", text: "I caught one!", x: m.figX, y: m.y - 90, life: 1.5 });
       playJingle();
       for (let i = 0; i < 6; i++) {
-        game.particles.push({ type: "spark", x: m.figX + m.dir * 40, y: 512, vx: rand(-60, 60), vy: rand(-140, -60), life: 0.5, color: "#bfe8ff", size: rand(2, 3.5) });
+        game.particles.push({ type: "spark", x: m.figX + m.face * 40, y: 512, vx: rand(-60, 60), vy: rand(-140, -60), life: 0.5, color: "#bfe8ff", size: rand(2, 3.5) });
       }
       m.state = "returnBack";
     }
@@ -103,7 +105,7 @@ export function updateMaisy(dt) {
     } else {
       const dx = game.carrot.x - m.figX;
       m.figX += Math.sign(dx) * 130 * dt;
-      m.dir = dx >= 0 ? 1 : -1;
+      m.face = dx >= 0 ? 1 : -1;
       m.phase += dt * 10;
       if (Math.abs(dx) < 22) {
         m.state = "eating";
@@ -137,13 +139,14 @@ export function updateMaisy(dt) {
       m.offX = 46;
     } else {
       m.figX += Math.sign(dx) * 130 * dt;
-      m.dir = dx >= 0 ? 1 : -1;
+      m.face = dx >= 0 ? 1 : -1;
       m.phase += dt * 10;
     }
   } else if (m.state === "back") {
     m.timer -= dt;
     m.offX = Math.max(0, (m.timer / 0.8) * 46);
     m.figX = m.x + m.dir * m.offX;
+    m.face = m.dir;
     if (m.timer <= 0) {
       m.state = "drivingOff";
     }
@@ -160,9 +163,6 @@ export function updateMaisy(dt) {
 export function drawMaisy() {
   if (!game.maisy) return;
   const m = game.maisy;
-  const walking = m.state === "walkCarrot" || m.state === "returnBack";
-  const bob = m.state === "talking" ? Math.abs(Math.sin(game.time * 6)) * 4 : walking ? Math.abs(Math.sin(m.phase)) * 3 : 0;
-  const hx = m.figX;
   const driving = m.state === "driving" || m.state === "drivingOff";
 
   ctx.fillStyle = "rgba(0,0,0,0.15)";
@@ -225,15 +225,16 @@ export function drawMaisy() {
   }
 
   if (m.offX > 8) {
-    const hx = m.x + m.dir * m.offX;
-    const bob = m.state === "talking" ? Math.abs(Math.sin(game.time * 6)) * 4 : 0;
+    const hx = m.figX;
+    const walking = m.state === "walkPond" || m.state === "walkCarrot" || m.state === "returnBack";
+    const bob = m.state === "talking" ? Math.abs(Math.sin(game.time * 6)) * 4 : walking ? Math.abs(Math.sin(m.phase)) * 3 : 0;
     ctx.fillStyle = "rgba(0,0,0,0.12)";
     ctx.beginPath();
     ctx.ellipse(hx, m.y + 16, 13, 4, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.save();
     ctx.translate(hx, m.y - bob);
-    ctx.scale(m.dir, 1);
+    ctx.scale(m.face, 1);
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
@@ -360,21 +361,21 @@ export function drawMaisy() {
     ctx.stroke();
     ctx.restore();
     if (m.state === "fishing") {
-      const tipX = hx + m.dir * 30;
+      const tipX = hx + m.face * 30;
       const tipY = m.y - bob + 8;
       ctx.strokeStyle = "rgba(255,255,255,0.8)";
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(tipX, tipY);
-      ctx.lineTo(tipX + m.dir * 10, 514);
+      ctx.lineTo(tipX + m.face * 10, 514);
       ctx.stroke();
       ctx.fillStyle = "#e63946";
       ctx.beginPath();
-      ctx.arc(tipX + m.dir * 10, 514, 3, 0, Math.PI * 2);
+      ctx.arc(tipX + m.face * 10, 514, 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#fff";
       ctx.beginPath();
-      ctx.arc(tipX + m.dir * 10, 511.5, 1.5, 0, Math.PI * 2);
+      ctx.arc(tipX + m.face * 10, 511.5, 1.5, 0, Math.PI * 2);
       ctx.fill();
     }
     if (m.state === "talking") {

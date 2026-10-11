@@ -182,10 +182,10 @@ export function updateDucklings(dt) {
       if (Math.random() < 0.006) wordAt("peep!!", dl.x, dl.y - 30);
       continue;
     }
-    let carSlot = 0;
     if (game.duck.brain === "ride") {
-      const back = game.rideDist - (carSlot + 1) * 46;
-      carSlot++;
+      // Each baby gets their own car, one behind the other.
+      const seat = game.ducklings.slice(0, i).filter(d => !d.mode).length;
+      const back = game.rideDist - (seat + 1) * 46;
       const pos = trackAt(back);
       dl.x = pos.x;
       dl.y = pos.y - 6;

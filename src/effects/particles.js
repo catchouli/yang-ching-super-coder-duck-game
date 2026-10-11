@@ -6,6 +6,7 @@ import { drawStar } from "../draw/shapes.js";
 
 export function drawParticles() {
   for (const p of game.particles) {
+    // Floating words are drawn later with the speech bubbles, so they sit on top.
     if (p.type === "word") continue;
     if (p.type === "spark") {
       ctx.globalAlpha = Math.max(0, p.life * 2) * (0.7 + 0.3 * Math.sin(game.time * 40 + p.x * 7));
@@ -58,16 +59,6 @@ export function drawParticles() {
       ctx.fillStyle = "#6a5acd";
       ctx.font = "bold " + (12 + age * 8) + "px 'Comic Sans MS', 'Chalkboard SE', cursive";
       ctx.fillText("z", p.x, p.y);
-    } else if (p.type === "word") {
-      ctx.globalAlpha = Math.max(0, p.life / 1.2);
-      ctx.font = "bold 14px 'Comic Sans MS', 'Chalkboard SE', cursive";
-      ctx.textAlign = "center";
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#fff";
-      ctx.strokeText(p.text, p.x, p.y);
-      ctx.fillStyle = "#d97f0e";
-      ctx.fillText(p.text, p.x, p.y);
-      ctx.textAlign = "left";
     } else if (p.type === "heart") {
       ctx.globalAlpha = Math.max(0, p.life / 1.3);
       ctx.save();

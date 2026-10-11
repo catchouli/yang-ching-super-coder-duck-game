@@ -146,6 +146,9 @@ export function drawKeanu() {
   ctx.stroke();
   ctx.restore();
 
+  if (game.keanuFly > 0) {
+    bubbleQueue.push({ x: 400, top: 296, text: "THE ONE PIECE IS REALLLLLL!!!", font: "bold 18px monospace", bg: "rgba(0, 20, 0, 0.92)", border: "#33dd55", color: "#66ff77", bw: 2.5, pad: 12 });
+  }
   if (!game.keanuFly && !game.keanuGone && game.matrixMode < 8 && game.matrixMode > 2) {
     bubbleQueue.push({ x: 400, top: 330, text: "MATRIX!!!!", font: "bold 26px monospace", bg: "rgba(0, 20, 0, 0.92)", border: "#33dd55", color: "#66ff77", bw: 2.5, pad: 15, h: 44 });
   }
@@ -153,7 +156,6 @@ export function drawKeanu() {
 }
 
 export function onKeanuClick() {
-  bubbleQueue.push({ x: 400, top: 296, text: "THE ONE PIECE IS REALLLLLL!!!", font: "bold 18px monospace", bg: "rgba(0, 20, 0, 0.92)", border: "#33dd55", color: "#66ff77", bw: 2.5, pad: 12 });
   playMatrix();
   playWhee();
   game.keanuFly = 1.2;
